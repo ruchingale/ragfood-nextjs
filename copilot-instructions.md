@@ -1,3 +1,19 @@
+# RAG Food App - Updated Architecture
+
+## Key Requirements
+
+### Vector Database & Embeddings
+- Use Upstash Vector as the primary vector database
+- When provisioning Upstash in Vercel, you **must** select mixedbread-ai/mxbai-embed-large-v1 as the embedding model
+- Remove ALL explicit embedding calls to external services (Cohere, Clarifai, etc.) from the core pipeline
+- Upstash's built-in embedding model will handle all vectorization automatically
+
+### Provider Switching
+- Maintain environment variable based provider switching (VECTOR_DB_TYPE)
+- Default to Upstash Vector but allow fallback to simple in-memory store
+- Environment configuration must support easy switching between providers
+- Structure codebase to support adding new vector store backends in future
+
 ## Technical Implementation
 
 ### Database Strategy:
