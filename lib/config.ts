@@ -2,24 +2,17 @@ import { z } from 'zod'
 
 // Environment variable schema
 const envSchema = z.object({
-  // Database configuration
-  VECTOR_DB_TYPE: z.enum(['chroma', 'upstash', 'simple']).default('simple'),
-  CHROMA_PATH: z.string().default('./chroma_db'),
-  UPSTASH_VECTOR_URL: z.string().optional(),
-  UPSTASH_VECTOR_TOKEN: z.string().optional(),
+  // Database configuration (Upstash primary, simple fallback)
+  VECTOR_DB_TYPE: z.enum(['upstash', 'simple']).default('upstash'),
+  UPSTASH_VECTOR_REST_URL: z.string().optional(),
+  UPSTASH_VECTOR_REST_TOKEN: z.string().optional(),
 
-  // AI provider configuration
-  EMBEDDING_PROVIDER: z.enum(['ollama', 'clarifai']).default('ollama'),
+  // LLM Provider configuration
   LLM_PROVIDER: z.enum(['ollama', 'groq']).default('ollama'),
-
-  // Ollama configuration
+  
+  // Ollama configuration (for LLM only)
   OLLAMA_BASE_URL: z.string().default('http://localhost:11434'),
-  EMBED_MODEL: z.string().default('mxbai-embed-large'),
   LLM_MODEL: z.string().default('llama3.2'),
-
-  // Clarifai configuration
-  CLARIFAI_PAT: z.string().optional(),
-  CLARIFAI_MODEL_URL: z.string().optional(),
 
   // Groq configuration
   GROQ_API_KEY: z.string().optional(),
@@ -31,16 +24,11 @@ function validateEnv() {
   try {
     return envSchema.parse({
       VECTOR_DB_TYPE: process.env.VECTOR_DB_TYPE,
-      CHROMA_PATH: process.env.CHROMA_PATH,
-      UPSTASH_VECTOR_URL: process.env.UPSTASH_VECTOR_URL,
-      UPSTASH_VECTOR_TOKEN: process.env.UPSTASH_VECTOR_TOKEN,
-      EMBEDDING_PROVIDER: process.env.EMBEDDING_PROVIDER,
+      UPSTASH_VECTOR_REST_URL: process.env.UPSTASH_VECTOR_REST_URL,
+      UPSTASH_VECTOR_REST_TOKEN: process.env.UPSTASH_VECTOR_REST_TOKEN,
       LLM_PROVIDER: process.env.LLM_PROVIDER,
       OLLAMA_BASE_URL: process.env.OLLAMA_BASE_URL,
-      EMBED_MODEL: process.env.EMBED_MODEL,
       LLM_MODEL: process.env.LLM_MODEL,
-      CLARIFAI_PAT: process.env.CLARIFAI_PAT,
-      CLARIFAI_MODEL_URL: process.env.CLARIFAI_MODEL_URL,
       GROQ_API_KEY: process.env.GROQ_API_KEY,
       GROQ_MODEL: process.env.GROQ_MODEL,
     })
@@ -63,7 +51,6 @@ export const isDevelopment = process.env.NODE_ENV === 'development'
 if (isDevelopment) {
   console.log('🔧 Configuration loaded:', {
     vectorDb: config.VECTOR_DB_TYPE,
-    embeddingProvider: config.EMBEDDING_PROVIDER,
     llmProvider: config.LLM_PROVIDER,
   })
 }

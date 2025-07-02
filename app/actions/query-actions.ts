@@ -143,15 +143,12 @@ export async function getRagSearchResults(request: unknown) {
     console.log(`🔍 Getting RAG search results for: "${question}"`)
     const startTime = Date.now()
     
-    const { db, embedding } = await initializeProviders()
+    const { db } = await initializeProviders()
     
-    // Step 1: Embed the user question
-    console.log('📝 Generating question embedding...')
-    const questionEmbedding = await embedding.getEmbedding(question)
-    
-    // Step 2: Query the vector database
+    // Query the vector database directly with the question text
+    // Upstash will handle embedding internally
     console.log('🔍 Searching vector database...')
-    const searchResults = await db.query(questionEmbedding, DEFAULT_RAG_RESULTS)
+    const searchResults = await db.query(question, DEFAULT_RAG_RESULTS)
     
     if (searchResults.documents.length === 0) {
       return {

@@ -46,7 +46,7 @@ export async function embedFoodsData(request: unknown): Promise<EmbeddingResult>
     // Validate request
     const { force } = EmbedRequestSchema.parse(request)
     
-    const { db, embedding: embeddingProvider } = await initializeProviders()
+    const { db } = await initializeProviders()
     
     // Load food data
     const foods = await loadFoodsData()
@@ -76,21 +76,21 @@ export async function embedFoodsData(request: unknown): Promise<EmbeddingResult>
     
     console.log(`🆕 Embedding ${newItems.length} new items...`)
     
-    // Process items in batches to avoid overwhelming the embedding service
-    const batchSize = 10
+    // Process items in batches to avoid overwhelming the service
+    const batchSize = 5
     let processed = 0
     
     for (let i = 0; i < newItems.length; i += batchSize) {
       const batch = newItems.slice(i, i + batchSize)
       
-      // Generate embeddings for batch
+      // Prepare documents for batch
       const documents: string[] = []
       const embeddings: number[][] = []
       const ids: string[] = []
       
       for (const item of batch) {
         try {
-          // Enhance text with region/type information (same as Python version)
+          // Enhance text with region/type information
           let enrichedText = item.text
           if (item.region) {
             enrichedText += ` This food is popular in ${item.region}.`
@@ -99,19 +99,16 @@ export async function embedFoodsData(request: unknown): Promise<EmbeddingResult>
             enrichedText += ` It is a type of ${item.type}.`
           }
           
-          // Get embedding for enriched text
-          const embeddingVector = await embeddingProvider.getEmbedding(enrichedText)
-          
-          // Store original text as retrievable context
-          documents.push(item.text)
-          embeddings.push(embeddingVector)
+          // Let Upstash handle the embedding
+          documents.push(enrichedText)
+          embeddings.push([]) // Empty array since Upstash will generate embeddings
           ids.push(item.id)
           
           processed++
           console.log(`📝 Processed ${processed}/${newItems.length}: ${item.id}`)
           
         } catch (error) {
-          console.error(`❌ Failed to embed item ${item.id}:`, error)
+          console.error(`❌ Failed to process item ${item.id}:`, error)
           // Continue with other items
         }
       }

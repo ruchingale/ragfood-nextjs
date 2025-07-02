@@ -55,8 +55,7 @@ export interface RagQueryResponse {
 }
 
 // Provider types
-export type VectorDbType = 'chroma' | 'upstash'
-export type EmbeddingProvider = 'ollama' | 'clarifai'
+export type VectorDbType = 'simple' | 'upstash'
 export type LlmProvider = 'ollama' | 'groq'
 
 // Zod schemas for validation
