@@ -1,5 +1,5 @@
-import { Index } from '@upstash/vector'
-import { config, COLLECTION_NAME } from '../config'
+import { Index, QueryResult } from '@upstash/vector'
+import { config } from '../config'
 import { RagResult, FoodMetadata } from '../types'
 import * as fs from 'fs'
 import * as path from 'path'
@@ -121,11 +121,6 @@ class SimpleVectorDatabase implements VectorDatabase {
     const data = { documents: this.documents }
     fs.writeFileSync(this.dataFile, JSON.stringify(data, null, 2))
   }
-
-  private embedQuery(query: string): number[] {
-    // Implement your own query embedding logic here
-    return Array.from({ length: 768 }, () => Math.random()) // Dummy implementation
-  }
 }
 
 // Removed ChromaDB implementation as we're using Upstash as primary database
@@ -238,7 +233,7 @@ class UpstashDatabase implements VectorDatabase {
 
       // Filter and sort results based on relevance
       return searchResults
-        .filter(r => {
+        .filter((r: QueryResult) => {
           const metadata = r.metadata as { document: string }
           const text = metadata.document.toLowerCase()
           // For questions about attributes, check if the document mentions those attributes
@@ -254,10 +249,10 @@ class UpstashDatabase implements VectorDatabase {
     })
 
     return {
-      documents: results.map(r => (r.metadata as { document?: string })?.document || ''),
-      ids: results.map(r => String(r.id)),
-      distances: results.map(r => 1 - (r.score || 0)), // Convert similarity score to distance
-      metadatas: results.map(r => r.metadata as FoodMetadata),
+      documents: results.map((r: QueryResult) => (r.metadata as { document?: string })?.document || ''),
+      ids: results.map((r: QueryResult) => String(r.id)),
+      distances: results.map((r: QueryResult) => 1 - (r.score || 0)), // Convert similarity score to distance
+      metadatas: results.map((r: QueryResult) => r.metadata as FoodMetadata),
     }
   }
 
@@ -283,11 +278,6 @@ class UpstashDatabase implements VectorDatabase {
       console.warn('⚠️ Could not fetch existing IDs from Upstash:', error)
       return []
     }
-  }
-
-  private embedQuery(query: string): number[] {
-    // Implement your own query embedding logic here
-    return Array.from({ length: 768 }, () => Math.random()) // Dummy implementation
   }
 }
 

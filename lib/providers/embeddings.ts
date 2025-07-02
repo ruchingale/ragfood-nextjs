@@ -9,7 +9,7 @@ export interface EmbeddingProvider {
 
 // Placeholder implementation that throws an error if accidentally used
 class DeprecatedEmbeddingProvider implements EmbeddingProvider {
-  async getEmbedding(_text: string): Promise<number[]> {
+  async getEmbedding(): Promise<number[]> {
     throw new Error('External embedding providers are deprecated. Upstash Vector now handles embeddings internally.')
   }
 }
