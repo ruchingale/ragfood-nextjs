@@ -1,15 +1,24 @@
 'use server'
 
-import { readFile } from 'fs/promises'
-import { join } from 'path'
 import { FoodItemSchema, type FoodItem } from '@/lib/types'
 
 // Load foods.json data
 export async function loadFoodsData(): Promise<FoodItem[]> {
   try {
-    const filePath = join(process.cwd(), 'foods.json')
-    const fileContent = await readFile(filePath, 'utf-8')
-    const rawData = JSON.parse(fileContent)
+    // Use HTTP fetch to get foods.json from public directory
+    let url = ''
+    if (typeof window === 'undefined') {
+      // On server, use NEXT_PUBLIC_BASE_URL if available
+      url = process.env.NEXT_PUBLIC_BASE_URL
+        ? `${process.env.NEXT_PUBLIC_BASE_URL}/foods.json`
+        : 'http://localhost:3000/foods.json'
+    } else {
+      // On client, use relative path
+      url = '/foods.json'
+    }
+    const res = await fetch(url)
+    if (!res.ok) throw new Error('Failed to fetch foods.json')
+    const rawData = await res.json()
     
     // Validate each food item
     const validatedData = rawData.map((item: unknown) => {
@@ -24,7 +33,7 @@ export async function loadFoodsData(): Promise<FoodItem[]> {
     console.log(`✅ Loaded ${validatedData.length} food items`)
     return validatedData
   } catch (error) {
-    console.error('❌ Failed to load foods data:', error)
+    console.error('❌ Failed to load foods data:', error, error?.stack)
     throw new Error('Failed to load foods data')
   }
 }
