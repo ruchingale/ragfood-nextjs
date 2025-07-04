@@ -33,7 +33,11 @@ export async function loadFoodsData(): Promise<FoodItem[]> {
     console.log(`✅ Loaded ${validatedData.length} food items`)
     return validatedData
   } catch (error) {
-    console.error('❌ Failed to load foods data:', error, error?.stack)
+    console.error(
+      '❌ Failed to load foods data:',
+      error,
+      error instanceof Error ? error.stack : undefined
+    )
     throw new Error('Failed to load foods data')
   }
 }
